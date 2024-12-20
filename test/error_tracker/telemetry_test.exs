@@ -29,15 +29,15 @@ defmodule ErrorTracker.TelemetryTest do
                     %{occurrence: %Occurrence{}}}
   end
 
-  test "events are emitted for resolved and unresolved errors" do
+  test "events are emitted for resolved, unresolved, and ignored errors" do
     %Occurrence{error: error = %Error{}} = report_error(fn -> raise "This is a test" end)
 
     # The resolved event will be emitted
-    {:ok, resolved = %Error{}} = ErrorTracker.resolve(error)
+    {:ok, resolved = %Error{}} = ErrorTracker.change_status(error, :resolved)
     assert_receive {:telemetry_event, [:error_tracker, :error, :resolved], _, %{error: %Error{}}}
 
     # The unresolved event will be emitted
-    {:ok, _unresolved} = ErrorTracker.unresolve(resolved)
+    {:ok, _unresolved} = ErrorTracker.change_status(resolved, :unresolved)
 
     assert_receive {:telemetry_event, [:error_tracker, :error, :unresolved], _,
                     %{error: %Error{}}}

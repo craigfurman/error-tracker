@@ -114,16 +114,21 @@
     <.section title="Status" title_class="mb-3">
       <.badge :if={@error.status == :resolved} color={:green}>Resolved</.badge>
       <.badge :if={@error.status == :unresolved} color={:red}>Unresolved</.badge>
+      <.badge :if={@error.status == :ignored} color={:gray}>Ignored</.badge>
     </.section>
 
     <.section>
-      <.button :if={@error.status == :unresolved} phx-click="resolve">
-        Mark as resolved
-      </.button>
-
-      <.button :if={@error.status == :resolved} phx-click="unresolve">
-        Mark as unresolved
-      </.button>
+      <.form for={nil} id="status-form" phx-change="status-change" phx-value-error_id={@error.id}>
+        <select id="status-select" name="status">
+          <option
+            :for={status <- [:unresolved, :resolved, :ignored]}
+            selected={@error.status == status}
+            value={status}
+          >
+            <%= status %>
+          </option>
+        </select>
+      </.form>
     </.section>
   </div>
 </div>

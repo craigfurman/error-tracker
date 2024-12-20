@@ -151,30 +151,18 @@ defmodule ErrorTracker do
   end
 
   @doc """
-  Marks an error as resolved.
+  Changes error status.
 
   If an error is marked as resolved and it happens again, it will automatically
   appear as unresolved again.
   """
-  @spec resolve(Error.t()) :: {:ok, Error.t()} | {:error, Ecto.Changeset.t()}
-  def resolve(error = %Error{status: :unresolved}) do
-    changeset = Ecto.Changeset.change(error, status: :resolved)
+  @spec change_status(Error.t(), :resolved | :unresolved | :ignored) ::
+          {:ok, Error.t()} | {:error, Ecto.Changeset.t()}
+  def change_status(error = %Error{}, status) do
+    changeset = Ecto.Changeset.change(error, status: status)
 
     with {:ok, updated_error} <- Repo.update(changeset) do
-      Telemetry.resolved_error(updated_error)
-      {:ok, updated_error}
-    end
-  end
-
-  @doc """
-  Marks an error as unresolved.
-  """
-  @spec unresolve(Error.t()) :: {:ok, Error.t()} | {:error, Ecto.Changeset.t()}
-  def unresolve(error = %Error{status: :resolved}) do
-    changeset = Ecto.Changeset.change(error, status: :unresolved)
-
-    with {:ok, updated_error} <- Repo.update(changeset) do
-      Telemetry.unresolved_error(updated_error)
+      Telemetry.change_status(updated_error)
       {:ok, updated_error}
     end
   end
@@ -337,8 +325,9 @@ defmodule ErrorTracker do
     # sent a Telemetry event
     # If it is a new error, sent a Telemetry event
     case existing_status do
-      :resolved -> Telemetry.unresolved_error(error)
+      :resolved -> Telemetry.change_status(error)
       :unresolved -> :noop
+      :ignored -> :noop
       nil -> Telemetry.new_error(error)
     end
 

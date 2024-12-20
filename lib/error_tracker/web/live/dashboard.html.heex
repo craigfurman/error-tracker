@@ -39,6 +39,9 @@
     <option value="resolved" selected={@search_form[:status].value == "resolved"}>
       Resolved
     </option>
+    <option value="ignored" selected={@search_form[:status].value == "ignored"}>
+      Ignored
+    </option>
   </select>
 </.form>
 
@@ -85,23 +88,25 @@
         <td class="px-4 py-4">
           <.badge :if={error.status == :resolved} color={:green}>Resolved</.badge>
           <.badge :if={error.status == :unresolved} color={:red}>Unresolved</.badge>
+          <.badge :if={error.status == :ignored} color={:gray}>Ignored</.badge>
         </td>
         <td class="px-4 py-4 text-center">
-          <.button
-            :if={error.status == :unresolved}
-            phx-click="resolve"
+          <.form
+            for={nil}
+            id={"status-form-#{error.id}"}
+            phx-change="status-change"
             phx-value-error_id={error.id}
           >
-            Resolve
-          </.button>
-
-          <.button
-            :if={error.status == :resolved}
-            phx-click="unresolve"
-            phx-value-error_id={error.id}
-          >
-            Unresolve
-          </.button>
+            <select id={"status-select-#{error.id}"} name="status">
+              <option
+                :for={status <- [:unresolved, :resolved, :ignored]}
+                selected={error.status == status}
+                value={status}
+              >
+                <%= status %>
+              </option>
+            </select>
+          </.form>
         </td>
       </tr>
     </tbody>

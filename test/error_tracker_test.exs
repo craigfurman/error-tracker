@@ -133,11 +133,12 @@ defmodule ErrorTrackerTest do
     end
   end
 
+  # TODO change
   describe inspect(&ErrorTracker.resolve/1) do
     test "marks the error as resolved" do
       %Occurrence{error: error} = report_error(fn -> raise "This is a test" end)
 
-      assert {:ok, %Error{status: :resolved}} = ErrorTracker.resolve(error)
+      assert {:ok, %Error{status: :resolved}} = ErrorTracker.change_status(error, :resolved)
     end
   end
 
@@ -145,9 +146,10 @@ defmodule ErrorTrackerTest do
     test "marks the error as unresolved" do
       %Occurrence{error: error} = report_error(fn -> raise "This is a test" end)
       # Manually mark the error as resolved
-      {:ok, resolved} = ErrorTracker.resolve(error)
+      {:ok, resolved} = ErrorTracker.change_status(error, :resolved)
 
-      assert {:ok, %Error{status: :unresolved}} = ErrorTracker.unresolve(resolved)
+      assert {:ok, %Error{status: :unresolved}} =
+               ErrorTracker.change_status(resolved, :unresolved)
     end
   end
 

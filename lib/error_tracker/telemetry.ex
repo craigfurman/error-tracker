@@ -47,17 +47,10 @@ defmodule ErrorTracker.Telemetry do
   end
 
   @doc false
-  def unresolved_error(error) do
+  def change_status(error) do
     measurements = %{system_time: System.system_time()}
     metadata = %{error: error}
-    :telemetry.execute([:error_tracker, :error, :unresolved], measurements, metadata)
-  end
-
-  @doc false
-  def resolved_error(error) do
-    measurements = %{system_time: System.system_time()}
-    metadata = %{error: error}
-    :telemetry.execute([:error_tracker, :error, :resolved], measurements, metadata)
+    :telemetry.execute([:error_tracker, :error, error.status], measurements, metadata)
   end
 
   @doc false

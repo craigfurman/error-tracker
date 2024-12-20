@@ -56,15 +56,9 @@ defmodule ErrorTracker.Web.Live.Show do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("resolve", _params, socket) do
-    {:ok, updated_error} = ErrorTracker.resolve(socket.assigns.error)
-
-    {:noreply, assign(socket, :error, updated_error)}
-  end
-
-  @impl Phoenix.LiveView
-  def handle_event("unresolve", _params, socket) do
-    {:ok, updated_error} = ErrorTracker.unresolve(socket.assigns.error)
+  def handle_event("status-change", %{"status" => status}, socket) do
+    {:ok, updated_error} =
+      ErrorTracker.change_status(socket.assigns.error, String.to_atom(status))
 
     {:noreply, assign(socket, :error, updated_error)}
   end
